@@ -1,10 +1,10 @@
 window.addEventListener('DOMContentLoaded',async ()=>{
 	
 	let data=await getSwingLeftEvents(mobilizeURL);
-
+	writeZipCodeFilterControls();
 	addHcdpCalender(data);
 	writeFilterByTypeControls(data);
-
+	
 });
 
 let mobilizeURL='https://api.mobilize.us/v1/organizations/210/events?timeslot_end=gte_now';
@@ -49,6 +49,45 @@ async function addHcdpCalender(swingtxleftEvents){
 
 }
 
+function writeZipCodeFilterControls(){
+	
+	let zipFilterContainer=document.getElementById('swingleftZipCodeFilter');
+
+	//Zipcode: <input id="zipCodeForFilter" type="text"> Distance: <input id="distanceForFilter" type="text"> Miles
+
+	zipFilterContainer.appendChild(document.createTextNode('Zipcode:'));
+
+
+	let zipInput=document.createElement('input');
+	zipInput.setAttribute('id','zipCodeForFilter');
+	zipInput.setAttribute('type','text');
+	zipInput.addEventListener('blur',whenFilterLocationEnabledReAddCalanderWithFiltering);
+	zipFilterContainer.appendChild(zipInput);
+
+
+	zipFilterContainer.appendChild(document.createTextNode('Distiance:'));
+
+	let distianceInput=document.createElement('input');
+	distianceInput.setAttribute('id','distanceForFilter');
+	distianceInput.setAttribute('type','text');
+	distianceInput.addEventListener('blur',whenFilterLocationEnabledReAddCalanderWithFiltering);
+	zipFilterContainer.appendChild(distianceInput);
+
+	zipFilterContainer.appendChild(document.createTextNode('miles'));
+
+	let zipFilterButton=elementWithText('button','Filter by location (This will exclude Virtual Events From Results)');
+	zipFilterButton.classList.add('locationFilterButton');
+	zipFilterButton.addEventListener('click',filterButtonClick);
+	zipFilterContainer.appendChild(zipFilterButton);
+	
+}
+function whenFilterLocationEnabledReAddCalanderWithFiltering(){
+	if(document.querySelectorAll('.locationFilterButton.eventFilterButtonSelected').length>0){
+		reAddCalanderWithFiltering();
+	}
+	
+}
+
 function writeFilterByTypeControls(swingtxleftEvents){
 	document.getElementById('swingleftTypeOptions').innerHTML=''
 	let typeFilterContainer=document.getElementById('swingleftTypeOptions');
@@ -88,6 +127,14 @@ async function reAddCalanderWithFiltering(){
 		queryURL=queryURL+'&event_types='+ b.getAttribute('data-event-type');
 	}
 
+	if(document.querySelectorAll('.locationFilterButton.eventFilterButtonSelected').length>0){
+		console.log('geo filtering');
+		let zipcode=document.getElementById('zipCodeForFilter').value;
+		let distance=document.getElementById('distanceForFilter').value;
+		queryURL=queryURL+'&zipcode='+zipcode+'&max_dist='+distance;
+	}
+
+	console.log(queryURL);
 	addHcdpCalender(await getSwingLeftEvents(queryURL));
 }
 
