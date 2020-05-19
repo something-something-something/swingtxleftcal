@@ -68,7 +68,17 @@ function eventHTML(event){
 	if(event.location!==null){
 		
 			eventDiv.appendChild(eventFieldHTML('Location',event.location.venue));
-		
+		if(event.address_visibility==='PUBLIC'){
+			let googlemapurl='https://www.google.com/maps/dir/?api=1';
+			let address=event.location.address_lines.join(' ')+event.location.locality+', '+event.location.region+' '+event.location.postal_code
+			googlemapurl=googlemapurl+'&destination='+encodeURIComponent(address);
+
+			mapLink=document.createElement('a');
+			mapLink.setAttribute('href',googlemapurl);
+			mapLink.setAttribute('target','_blank');
+			mapLink.appendChild(document.createTextNode('Directions'));
+			eventDiv.appendChild(mapLink);
+		}
 		
 		eventDiv.appendChild(elementWithText('div',event.location.address_lines.join('\n')));
 		eventDiv.appendChild(elementWithText('div',event.location.locality+', '+event.location.region+' '+event.location.postal_code));
