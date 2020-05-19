@@ -70,7 +70,7 @@ function eventHTML(event){
 			eventDiv.appendChild(eventFieldHTML('Location',event.location.venue));
 		if(event.address_visibility==='PUBLIC'){
 			let googlemapurl='https://www.google.com/maps/dir/?api=1';
-			let address=event.location.address_lines.join(' ')+event.location.locality+', '+event.location.region+' '+event.location.postal_code
+			let address=event.location.address_lines.join(' ')+' '+event.location.locality+', '+event.location.region+' '+event.location.postal_code
 			googlemapurl=googlemapurl+'&destination='+encodeURIComponent(address);
 
 			mapLink=document.createElement('a');
