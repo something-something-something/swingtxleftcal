@@ -1,23 +1,106 @@
-window.addEventListener('DOMContentLoaded',()=>{
-	addHcdpCalender();
+window.addEventListener('DOMContentLoaded',async ()=>{
+	
+	let data=await getSwingLeftEvents(mobilizeURL);
+
+	addHcdpCalender(data);
+	writeFilterByTypeControls(data);
+
 });
 
-//let mobilizeURL='https://api.mobilize.us/v1/organizations/210/events?timeslot_start=gte_now';
-let mobilizeURL='https://api.mobilize.us/v1/organizations/210/events?per_page=200';
+let mobilizeURL='https://api.mobilize.us/v1/organizations/210/events?timeslot_end=gte_now';
+
+if(fetchAllEventsModeOn()){
+	mobilizeURL='https://api.mobilize.us/v1/organizations/210/events?per_page=200';
+}
 
 
 
-async function addHcdpCalender(){
-	let theData=await getData(mobilizeURL);
+function isDebugModeOn(){
+	let searchParams=new URL(document.location).searchParams
+	return searchParams.get('debug')==='yes';
+}
+
+
+function fetchAllEventsModeOn(){
+	let searchParams=new URL(document.location).searchParams
+	return searchParams.get('allevents')==='yes';
+}
+
+
+async function getSwingLeftEvents(queryURL){
+	let theData=await getData(queryURL);
 	console.log(theData);
-	//document.getElementById('calInsert').innerText=JSON.stringify(theData);
 	swingtxleftEvents=theData.filter(filterOnlySwingTXLeft);
-	console.log(swingtxleftEvents);
-	console.log(swingtxleftEvents.filter(filterUpcomingEvents));
-	document.getElementById('futureEvents').innerHTML='';
-	writeEvents(swingtxleftEvents.filter(filterUpcomingEvents),document.getElementById('futureEvents'));
-	document.getElementById('pastEvents').innerHTML='';
-	writeEvents(swingtxleftEvents.filter(filterPastEvents).reverse(),document.getElementById('pastEvents'));
+	return swingtxleftEvents;
+}
+
+
+async function addHcdpCalender(swingtxleftEvents){
+	
+	//document.getElementById('calInsert').innerText=JSON.stringify(theData);
+	
+	// console.log(swingtxleftEvents.filter(filterUpcomingEvents));
+	// document.getElementById('futureEvents').innerHTML='';
+	// writeEvents(swingtxleftEvents.filter(filterUpcomingEvents),document.getElementById('futureEvents'));
+	// document.getElementById('pastEvents').innerHTML='';
+	// writeEvents(swingtxleftEvents.filter(filterPastEvents).reverse(),document.getElementById('pastEvents'));
+	document.getElementById('swingleftevents').innerHTML='';
+	writeEvents(swingtxleftEvents,document.getElementById('swingleftevents'));
+
+}
+
+function writeFilterByTypeControls(swingtxleftEvents){
+	document.getElementById('swingleftTypeOptions').innerHTML=''
+	let typeFilterContainer=document.getElementById('swingleftTypeOptions');
+	let eventTypes=getEventTypesAvailable(swingtxleftEvents);
+
+
+	for(let et of eventTypes){
+		let button=elementWithText('button',et);
+		button.setAttribute('data-event-type',et);
+
+		button.classList.add('eventTypeFilterButton');
+
+		button.addEventListener('click',filterButtonClick);
+		typeFilterContainer.appendChild(button);
+
+
+
+	}
+}
+
+function filterButtonClick(ev){
+	if(ev.currentTarget.classList.contains('eventFilterButtonSelected')){
+		ev.currentTarget.classList.remove('eventFilterButtonSelected');
+	}
+	else{
+		ev.currentTarget.classList.add('eventFilterButtonSelected');
+	}
+	reAddCalanderWithFiltering();
+}
+
+async function reAddCalanderWithFiltering(){
+	let queryURL=mobilizeURL;
+
+	let filterEventTypeButtonsSelected=document.querySelectorAll('.eventTypeFilterButton.eventFilterButtonSelected');
+
+	for(let b of filterEventTypeButtonsSelected){
+		queryURL=queryURL+'&event_types='+ b.getAttribute('data-event-type');
+	}
+
+	addHcdpCalender(await getSwingLeftEvents(queryURL));
+}
+
+function getEventTypesAvailable(swingtxleftEvents){
+	//todo see if can simplify
+	let eventTypeArray=[]
+	
+	for(let e of swingtxleftEvents){
+		if(!eventTypeArray.includes(e.event_type)){
+			eventTypeArray.push(e.event_type);
+		}
+	}
+	return eventTypeArray;
 }
 
 function filterOnlySwingTXLeft(event,index,arr){
@@ -33,17 +116,17 @@ function filterOnlySwingTXLeft(event,index,arr){
 
 
 
-function filterUpcomingEvents(event,index,arr){
-	return event.timeslots.some((time)=>{
-		return time.end_date>Math.floor(Date.now()/1000);
-	})
-}
+// function filterUpcomingEvents(event,index,arr){
+// 	return event.timeslots.some((time)=>{
+// 		return time.end_date>Math.floor(Date.now()/1000);
+// 	})
+// }
 
-function filterPastEvents(event,index,arr){
-	return event.timeslots.some((time)=>{
-		return time.end_date<Math.floor(Date.now()/1000);
-	})
-}
+// function filterPastEvents(event,index,arr){
+// 	return event.timeslots.some((time)=>{
+// 		return time.end_date<Math.floor(Date.now()/1000);
+// 	})
+// }
 
 function writeEvents(events,elementContainer){
 	for(let e of events){
@@ -62,6 +145,7 @@ function eventHTML(event){
 
 	eventDiv.appendChild(eventFieldHTML('Description',event.description));
 
+	eventDiv.appendChild(eventFieldHTML('Type',event.event_type));
 
 	eventDiv.appendChild(eventTimeSlotsHTML(event.timeslots));
 
@@ -92,8 +176,8 @@ function eventHTML(event){
 
 	eventDiv.appendChild(eventLink);
 
-	let searchParams=new URL(document.location).searchParams
-	if(searchParams.get('debug')==='yes'){
+	
+	if(isDebugModeOn()){
 		let debugtext=document.createElement('pre');
 		debugtext.textContent='FOR DEBUG DATA FROM MOBILIZE AMERICA: \n\n'+JSON.stringify(event,null,'\t');
 		eventDiv.appendChild(debugtext);
