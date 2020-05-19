@@ -111,7 +111,7 @@ function eventFieldHTML(fieldName,text){
 
 	fieldContainer.appendChild(fieldNameHTML);
 
-	fieldContainer.appendChild(document.createTextNode(text));
+	fieldContainer.appendChild(elementWithText('span',text));
 
 	return fieldContainer;
 }
