@@ -252,8 +252,8 @@ function overlaySignUp(ev){
 
 	signUpContainer.appendChild(signUpIframe);
 
-	let signUpCloseButton=elementWithText('button','X');
-	signUpCloseButton.setAttribute('style','top:0;right:0;position:fixed;width:10%;height:10%;font-size:8vmin;color:red;');
+	let signUpCloseButton=elementWithText('span','X');
+	signUpCloseButton.setAttribute('style','top:0;right:0;position:fixed;height:10vmin;width:10vmin;text-align:center;font-size:8vmin;line-height:normal;color:red;background-color:black;border-radius:50%;padding:1vmin;');
 	signUpCloseButton.addEventListener('click',()=>{
 		signUpContainer.remove();
 	})
