@@ -215,13 +215,19 @@ function eventHTML(event){
 		eventDiv.appendChild(elementWithText('div',event.location.locality+', '+event.location.region+' '+event.location.postal_code));
 	}
 
-	eventLink=document.createElement('a');
+	let eventLink=document.createElement('a');
 
 	eventLink.setAttribute('href',event.browser_url);
-
-	eventLink.appendChild(document.createTextNode('Sign Up'));
+	eventLink.setAttribute('target','_blank');
+	eventLink.appendChild(document.createTextNode('Sign Up -> New Tab'));
 
 	eventDiv.appendChild(eventLink);
+
+	let signUpButton=elementWithText('button','Sign Up (Overlay Signup page)');
+	signUpButton.addEventListener('click',overlaySignUp);
+	signUpButton.setAttribute('data-sign-up-url',event.browser_url);
+
+	eventDiv.appendChild(signUpButton);
 
 	
 	if(isDebugModeOn()){
@@ -231,6 +237,34 @@ function eventHTML(event){
 	}
 
 	return eventDiv;
+}
+
+function overlaySignUp(ev){
+	let signUpContainer=document.createElement('div');
+
+	signUpContainer.setAttribute('style','top:0;left:0;position:fixed;width:100%;height:100%;background-color:rgba(0,0,0,0.5);');
+
+	let signUpIframe=document.createElement('iframe');
+	signUpIframe.setAttribute('src',ev.currentTarget.getAttribute('data-sign-up-url'));
+	signUpIframe.setAttribute('style','top:10%;left:10%;position:fixed;width:80%;height:80%;');
+
+	signUpContainer.appendChild(signUpIframe);
+
+	let signUpCloseButton=elementWithText('button','X');
+	signUpCloseButton.setAttribute('style','top:0;right:0;position:fixed;width:10%;height:10%;font-size:8vmin;color:red;');
+	signUpCloseButton.addEventListener('click',()=>{
+		signUpContainer.remove();
+	})
+
+	signUpContainer.appendChild(signUpCloseButton);
+
+
+	signUpContainer.addEventListener('click',()=>{
+		signUpContainer.remove();
+	})
+
+	document.body.appendChild(signUpContainer);
+
 }
 
 
