@@ -4,6 +4,7 @@ window.addEventListener('DOMContentLoaded',async ()=>{
 	writeZipCodeFilterControls();
 	addHcdpCalender(data);
 	writeFilterByTypeControls(data);
+	//writeFilterByTagControls(data);
 	
 });
 
@@ -65,7 +66,7 @@ function writeZipCodeFilterControls(){
 	zipFilterContainer.appendChild(zipInput);
 
 
-	zipFilterContainer.appendChild(document.createTextNode('Distiance:'));
+	zipFilterContainer.appendChild(document.createTextNode('Distance:'));
 
 	let distianceInput=document.createElement('input');
 	distianceInput.setAttribute('id','distanceForFilter');
@@ -91,6 +92,7 @@ function whenFilterLocationEnabledReAddCalanderWithFiltering(){
 function writeFilterByTypeControls(swingtxleftEvents){
 	document.getElementById('swingleftTypeOptions').innerHTML=''
 	let typeFilterContainer=document.getElementById('swingleftTypeOptions');
+	typeFilterContainer.appendChild(document.createTextNode('Filter by Event Type:'));
 	let eventTypes=getEventTypesAvailable(swingtxleftEvents);
 
 
@@ -242,7 +244,7 @@ function eventHTML(event){
 function overlaySignUp(ev){
 	let signUpContainer=document.createElement('div');
 
-	signUpContainer.setAttribute('style','top:0;left:0;position:fixed;width:100%;height:100%;background-color:rgba(0,0,0,0.5);');
+	signUpContainer.setAttribute('style','z-index:900000000;top:0;left:0;position:fixed;width:100%;height:100%;background-color:rgba(0,0,0,0.5);');
 
 	let signUpIframe=document.createElement('iframe');
 	signUpIframe.setAttribute('src',ev.currentTarget.getAttribute('data-sign-up-url'));
