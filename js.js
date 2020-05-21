@@ -4,7 +4,7 @@ window.addEventListener('DOMContentLoaded',async ()=>{
 	writeZipCodeFilterControls();
 	addHcdpCalender(data);
 	writeFilterByTypeControls(data);
-	//writeFilterByTagControls(data);
+	writeFilterByTagControls(data);
 	
 });
 
@@ -35,6 +35,23 @@ async function getSwingLeftEvents(queryURL){
 	return swingtxleftEvents;
 }
 
+
+
+function splitEventsIntoTimeSlot(events){
+	let timeSlotArray=[]
+	for(let e of events){
+		for(let ets of e.timeslots){
+			let timeSlotObj={
+				timeslot:ets,
+				event:e
+			};
+			timeSlotArray.push(timeSlotObj);
+		}
+	}
+	return timeSlotArray.sort((fel,sel)=>{
+		return fel.timeslot.start_date-sel.timeslot.start_date;
+	});
+}
 
 async function addHcdpCalender(swingtxleftEvents){
 	
@@ -92,7 +109,7 @@ function whenFilterLocationEnabledReAddCalanderWithFiltering(){
 function writeFilterByTypeControls(swingtxleftEvents){
 	document.getElementById('swingleftTypeOptions').innerHTML=''
 	let typeFilterContainer=document.getElementById('swingleftTypeOptions');
-	typeFilterContainer.appendChild(document.createTextNode('Filter by Event Type:'));
+	typeFilterContainer.appendChild(document.createTextNode('Filter by Event Type: '));
 	let eventTypes=getEventTypesAvailable(swingtxleftEvents);
 
 
@@ -109,6 +126,44 @@ function writeFilterByTypeControls(swingtxleftEvents){
 
 	}
 }
+
+
+
+function writeFilterByTagControls(swingtxleftEvents){
+	let tagFilterContainer=document.getElementById('swingleftTagOptions');
+	tagFilterContainer.appendChild(document.createTextNode('Filter by Tags: '));
+	let tagArray=[];
+
+
+	for(let e of swingtxleftEvents){
+		if(e.tags.length>0){
+			for(let t of e.tags){
+				if(!tagArray.some((el)=>{ return t.id === el.id})){
+					tagArray.push({id:t.id,name:t.name});
+				}
+			}
+		}
+	}
+
+	console.log()
+
+
+	console.log(tagArray);
+
+	
+	for(let tag of tagArray){
+		let tagButton=elementWithText('button',tag.name);
+		tagButton.setAttribute('data-tag-id',tag.id);
+		tagButton.classList.add('tagFilterButton');
+		tagButton.addEventListener('click',filterButtonClick);
+
+		tagFilterContainer.appendChild(tagButton);
+	}
+
+
+}
+
+function getEventTagsAvailable(){}
 
 function filterButtonClick(ev){
 	if(ev.currentTarget.classList.contains('eventFilterButtonSelected')){
@@ -129,6 +184,12 @@ async function reAddCalanderWithFiltering(){
 		queryURL=queryURL+'&event_types='+ b.getAttribute('data-event-type');
 	}
 
+	let filterTagButtonsSelected=document.querySelectorAll('.tagFilterButton.eventFilterButtonSelected');
+
+	for(let b of filterTagButtonsSelected){
+		queryURL=queryURL+'&tag_id='+ b.getAttribute('data-tag-id');
+	}
+	
 	if(document.querySelectorAll('.locationFilterButton.eventFilterButtonSelected').length>0){
 		console.log('geo filtering');
 		let zipcode=document.getElementById('zipCodeForFilter').value;
@@ -142,7 +203,7 @@ async function reAddCalanderWithFiltering(){
 
 function getEventTypesAvailable(swingtxleftEvents){
 	//todo see if can simplify
-	let eventTypeArray=[]
+	let eventTypeArray=[];
 	
 	for(let e of swingtxleftEvents){
 		if(!eventTypeArray.includes(e.event_type)){
@@ -178,14 +239,16 @@ function filterOnlySwingTXLeft(event,index,arr){
 // }
 
 function writeEvents(events,elementContainer){
-	for(let e of events){
-		elementContainer.appendChild(eventHTML(e));
+	let eventTimeSlots=splitEventsIntoTimeSlot(events);
+	for(let ets of eventTimeSlots){
+		elementContainer.appendChild(eventTimeSlotHTML(ets));
 	}
 }
 
 
 
-function eventHTML(event){
+function eventTimeSlotHTML(eventTimeSlot){
+	let event=eventTimeSlot.event;
 	eventDiv=document.createElement('div');
 	eventDiv.appendChild(elementWithText('h2',event.title));
 	if(event.summary!==''){
@@ -195,8 +258,12 @@ function eventHTML(event){
 	eventDiv.appendChild(eventFieldHTML('Description',event.description));
 
 	eventDiv.appendChild(eventFieldHTML('Type',event.event_type));
-
-	eventDiv.appendChild(eventTimeSlotsHTML(event.timeslots));
+	
+	let startDate=new Date(eventTimeSlot.timeslot.start_date*1000);
+	let endDate=new Date(eventTimeSlot.timeslot.end_date*1000)
+	
+	eventDiv.appendChild(eventFieldHTML('Time',startDate.toLocaleString()+' to '+endDate.toLocaleString()));
+	//eventDiv.appendChild(eventTimeSlotsHTML(event.timeslots));
 
 	if(event.location!==null){
 		
@@ -283,22 +350,22 @@ function eventFieldHTML(fieldName,text){
 	return fieldContainer;
 }
 
-function eventTimeSlotsHTML(timeslots){
-	let timeslotContainer=document.createElement('div');
-	let timeslotList=document.createElement('ul');
+// function eventTimeSlotsHTML(timeslots){
+// 	let timeslotContainer=document.createElement('div');
+// 	let timeslotList=document.createElement('ul');
 
-	timeslotContainer.appendChild(timeslotList);
+// 	timeslotContainer.appendChild(timeslotList);
 
-	for(let t of timeslots){
-		let startDate=new Date(t.start_date*1000);
+// 	for(let t of timeslots){
+// 		let startDate=new Date(t.start_date*1000);
 		
-		let endDate=new Date(t.end_date*1000)
-		timeslotList.appendChild(elementWithText('li',startDate.toLocaleString()+' to '+endDate.toLocaleString()));
+// 		let endDate=new Date(t.end_date*1000)
+// 		timeslotList.appendChild(elementWithText('li',startDate.toLocaleString()+' to '+endDate.toLocaleString()));
 
-	}
+// 	}
 
-	return timeslotContainer;
-}
+// 	return timeslotContainer;
+// }
 
 function elementWithText(element,text){
 	let el=document.createElement(element);
