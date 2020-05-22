@@ -114,7 +114,7 @@ function writeFilterByTypeControls(swingtxleftEvents){
 
 
 	for(let et of eventTypes){
-		let button=elementWithText('button',et);
+		let button=elementWithText('button',humanizeEventType(et));
 		button.setAttribute('data-event-type',et);
 
 		button.classList.add('eventTypeFilterButton');
@@ -255,10 +255,33 @@ function eventTimeSlotHTML(eventTimeSlot){
 		eventDiv.appendChild(eventFieldHTML('Summary',event.summary));
 	}
 
-	eventDiv.appendChild(eventFieldHTML('Description',event.description));
+	let descriptionPreviewLength=200;
 
-	eventDiv.appendChild(eventFieldHTML('Type',event.event_type));
+	let descriptionField=elementWithText('span',event.description.substring(0,descriptionPreviewLength));
+	eventDiv.appendChild(descriptionField);
+	if(event.description.length>descriptionPreviewLength){
+		let showMoreClicker=elementWithText('a',' ...Click to Show More');
+		
+		showMoreClicker.addEventListener('click',(ev)=>{
+			descriptionField.innerText=event.description;
+			ev.currentTarget.remove();
+		});
+
+
+		eventDiv.appendChild(showMoreClicker);
+	}
+
 	
+
+	eventDiv.appendChild(eventFieldHTML('Type',humanizeEventType(event.event_type)));
+	
+	if(event.tags.length>0){
+		let tagtext=event.tags.map((el)=>{return el.name}).join(',');
+
+		eventDiv.appendChild(eventFieldHTML('Tags',tagtext));
+	}
+
+
 	let startDate=new Date(eventTimeSlot.timeslot.start_date*1000);
 	let endDate=new Date(eventTimeSlot.timeslot.end_date*1000)
 	
@@ -372,6 +395,24 @@ function elementWithText(element,text){
 	el.innerText=text;
 
 	return el;
+}
+
+function humanizeEventType(eventType){
+	if(eventType==='MEET_GREET'){
+		return 'Meet & Greet'
+	}
+
+	let words=eventType.split('_');
+
+	words=words.map((w)=>{
+		w=w.toLowerCase();
+		w=w[0].toUpperCase()+w.substring(1);
+		return w;
+	});
+
+	return words.join(' ');
+
+
 }
 
 async function getData(url){
