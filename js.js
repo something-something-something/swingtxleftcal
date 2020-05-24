@@ -5,6 +5,7 @@ window.addEventListener('DOMContentLoaded',async ()=>{
 	addHcdpCalender(data);
 	writeFilterByTypeControls(data);
 	writeFilterByTagControls(data);
+	writeFilterByVirtualStatusControls(data);
 	
 });
 
@@ -126,7 +127,25 @@ function writeFilterByTypeControls(swingtxleftEvents){
 
 	}
 }
+function writeFilterByVirtualStatusControls(swingtxleftEvents){
+	let virtualStatusFilterContainer=document.getElementById('swingleftVirtualStatusOptions');
+	virtualStatusFilterContainer.innerHTML=''
+	
+	virtualStatusFilterContainer.appendChild(document.createTextNode('Filter by Virtual Status: '));
+	
+	let statusArr=[
+		{name:'Virtual', value:'true'},
+		{name:'In Person',value:'false'}
+	]
+	for(let s of statusArr){
+		let button=elementWithText('button',s.name);
+		button.setAttribute('data-virtual-status',s.value);
+		button.classList.add('virtualStatusFilterButton');
+		button.addEventListener('click',filterButtonClick);
+		virtualStatusFilterContainer.appendChild(button);
+	}
 
+}
 
 
 function writeFilterByTagControls(swingtxleftEvents){
@@ -197,8 +216,31 @@ async function reAddCalanderWithFiltering(){
 		queryURL=queryURL+'&zipcode='+zipcode+'&max_dist='+distance;
 	}
 
+
+
+
 	console.log(queryURL);
-	addHcdpCalender(await getSwingLeftEvents(queryURL));
+
+
+	let additionalFilter
+
+	let data=await getSwingLeftEvents(queryURL);
+	
+	//todo write this a bit better
+	let filterVirtualStatusButtonsSelected=document.querySelectorAll('.virtualStatusFilterButton.eventFilterButtonSelected');
+	if(filterVirtualStatusButtonsSelected.length>0){
+		data=data.filter((el)=>{
+				for(let b of filterVirtualStatusButtonsSelected){
+					if(el.is_virtual.toString()===b.getAttribute('data-virtual-status')){
+						return true;
+					}
+				}
+			return false;
+		});
+	}
+	
+
+	addHcdpCalender(data);
 }
 
 function getEventTypesAvailable(swingtxleftEvents){
@@ -251,41 +293,35 @@ function eventTimeSlotHTML(eventTimeSlot){
 	let event=eventTimeSlot.event;
 	eventDiv=document.createElement('div');
 	eventDiv.appendChild(elementWithText('h2',event.title));
-	if(event.summary!==''){
-		eventDiv.appendChild(eventFieldHTML('Summary',event.summary));
-	}
+	// if(event.summary!==''){
+	// 	eventDiv.appendChild(eventFieldHTML('Summary',event.summary));
+	// }
 
-	let descriptionPreviewLength=200;
-
-	let descriptionField=elementWithText('span',event.description.substring(0,descriptionPreviewLength));
-	eventDiv.appendChild(descriptionField);
-	if(event.description.length>descriptionPreviewLength){
-		let showMoreClicker=elementWithText('a',' ...Click to Show More');
-		
-		showMoreClicker.addEventListener('click',(ev)=>{
-			descriptionField.innerText=event.description;
-			ev.currentTarget.remove();
-		});
-
-
-		eventDiv.appendChild(showMoreClicker);
-	}
+	
 
 	
 
 	eventDiv.appendChild(eventFieldHTML('Type',humanizeEventType(event.event_type)));
 	
-	if(event.tags.length>0){
-		let tagtext=event.tags.map((el)=>{return el.name}).join(',');
+	
 
-		eventDiv.appendChild(eventFieldHTML('Tags',tagtext));
-	}
+	let dateFormater=new Intl.DateTimeFormat(undefined,{
+		weekday:'long',
+		//era:'short',
+		year:'numeric',
+		month:'long',
+		day:'numeric',
+		hour:'numeric',
+		minute:'2-digit',
+		timeZoneName:'short'
 
-
+	});
 	let startDate=new Date(eventTimeSlot.timeslot.start_date*1000);
 	let endDate=new Date(eventTimeSlot.timeslot.end_date*1000)
 	
-	eventDiv.appendChild(eventFieldHTML('Time',startDate.toLocaleString()+' to '+endDate.toLocaleString()));
+	eventDiv.appendChild(eventFieldHTML('Starts:',dateFormater.format(startDate)));
+	
+	eventDiv.appendChild(eventFieldHTML('Ends:',dateFormater.format(endDate)));
 	//eventDiv.appendChild(eventTimeSlotsHTML(event.timeslots));
 
 	if(event.location!==null){
@@ -307,21 +343,40 @@ function eventTimeSlotHTML(eventTimeSlot){
 		eventDiv.appendChild(elementWithText('div',event.location.locality+', '+event.location.region+' '+event.location.postal_code));
 	}
 
-	let eventLink=document.createElement('a');
+	let descriptionPreviewLength=200;
 
-	eventLink.setAttribute('href',event.browser_url);
-	eventLink.setAttribute('target','_blank');
-	eventLink.appendChild(document.createTextNode('Sign Up -> New Tab'));
+	let descriptionField=elementWithText('div',event.description.substring(0,descriptionPreviewLength));
+	eventDiv.appendChild(descriptionField);
+	if(event.description.length>descriptionPreviewLength){
+		let showMoreClicker=elementWithText('a',' ...Click to Show More');
+		
+		showMoreClicker.addEventListener('click',(ev)=>{
+			descriptionField.innerText=event.description;
+			ev.currentTarget.remove();
+		});
 
-	eventDiv.appendChild(eventLink);
 
-	let signUpButton=elementWithText('button','Sign Up (Overlay Signup page)');
+		descriptionField.appendChild(showMoreClicker);
+	}
+	// let eventLink=document.createElement('a');
+
+	// eventLink.setAttribute('href',event.browser_url);
+	// eventLink.setAttribute('target','_blank');
+	// eventLink.appendChild(document.createTextNode('Sign Up -> New Tab'));
+
+	// eventDiv.appendChild(eventLink);
+
+	let signUpButton=elementWithText('button','Sign Up');
 	signUpButton.addEventListener('click',overlaySignUp);
 	signUpButton.setAttribute('data-sign-up-url',event.browser_url);
 
 	eventDiv.appendChild(signUpButton);
 
-	
+	if(event.tags.length>0){
+		let tagtext=event.tags.map((el)=>{return el.name}).join(', ');
+
+		eventDiv.appendChild(eventFieldHTML('Tags',tagtext));
+	}
 	if(isDebugModeOn()){
 		let debugtext=document.createElement('pre');
 		debugtext.textContent='FOR DEBUG DATA FROM MOBILIZE AMERICA: \n\n'+JSON.stringify(event,null,'\t');
