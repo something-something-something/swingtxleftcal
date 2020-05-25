@@ -324,10 +324,11 @@ function getEventTypesAvailable(swingtxleftEvents){
 
 function filterOnlySwingTXLeft(event,index,arr){
 	let swingtxleftRegExp=/swing\s*tx\s*left/i;
-	if(event.title.search(swingtxleftRegExp)!==-1){
+	let stxlRegExp=/STXL/i;
+	if(event.title.search(swingtxleftRegExp)!==-1||event.title.search(stxlRegExp)!==-1){
 		return true;
 	}
-	else if(event.description.search(swingtxleftRegExp)!==-1){
+	else if(event.description.search(swingtxleftRegExp)!==-1||event.description.search(stxlRegExp)!==-1){
 		return true;
 	}
 	return false;
@@ -404,8 +405,8 @@ function eventTimeSlotHTML(eventTimeSlot){
 		eventDiv.appendChild(elementWithText('div',event.location.locality+', '+event.location.region+' '+event.location.postal_code));
 	}
 
-	let descriptionPreviewLength=4;
-	let descriptionLines=event.description.split('\n');
+	let descriptionPreviewLength=2;
+	let descriptionLines=event.description.split('\n\n');
 
 	let descriptionField=document.createElement('div');
 	
@@ -415,7 +416,7 @@ function eventTimeSlotHTML(eventTimeSlot){
 
 	if(descriptionLines.length>descriptionPreviewLength){
 		let showMoreClicker=elementWithText('a',' ...Click to Show More');
-		descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(descriptionLines.slice(0,descriptionPreviewLength).join('\n')));
+		descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(descriptionLines.slice(0,descriptionPreviewLength).join('\n\n')));
 		showMoreClicker.addEventListener('click',(ev)=>{
 			descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(event.description));
 			ev.currentTarget.remove();
