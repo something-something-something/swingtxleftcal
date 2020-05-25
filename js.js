@@ -164,8 +164,6 @@ function writeFilterByTagControls(swingtxleftEvents){
 		}
 	}
 
-	console.log()
-
 
 	console.log(tagArray);
 
@@ -319,9 +317,9 @@ function eventTimeSlotHTML(eventTimeSlot){
 	let startDate=new Date(eventTimeSlot.timeslot.start_date*1000);
 	let endDate=new Date(eventTimeSlot.timeslot.end_date*1000)
 	
-	eventDiv.appendChild(eventFieldHTML('Starts:',dateFormater.format(startDate)));
+	eventDiv.appendChild(eventFieldHTML('Starts',dateFormater.format(startDate)));
 	
-	eventDiv.appendChild(eventFieldHTML('Ends:',dateFormater.format(endDate)));
+	eventDiv.appendChild(eventFieldHTML('Ends',dateFormater.format(endDate)));
 	//eventDiv.appendChild(eventTimeSlotsHTML(event.timeslots));
 
 	if(event.location!==null){
@@ -373,9 +371,24 @@ function eventTimeSlotHTML(eventTimeSlot){
 	eventDiv.appendChild(signUpButton);
 
 	if(event.tags.length>0){
-		let tagtext=event.tags.map((el)=>{return el.name}).join(', ');
+		let tagContainer=document.createElement('div');
+		tagContainer.classList.add('containerOfEventTags')
+		for (let t of event.tags){
 
-		eventDiv.appendChild(eventFieldHTML('Tags',tagtext));
+			let tagEl=document.createElement('div');
+			tagEl.classList.add('eventTag');
+			let theColor=makeStringToColorBorder(t.name);
+	
+			tagEl.style.borderColor='hsl('+theColor.hue+','+theColor.sat+'%,'+theColor.lum+'%)';
+		
+			let theColorB=makeStringToColorBackground(t.name);
+			tagEl.style.backgroundColor='hsl('+theColorB.hue+','+theColorB.sat+'%,'+theColorB.lum+'%)';
+
+			tagEl.textContent=t.name;
+
+			tagContainer.appendChild(tagEl)
+		}
+		eventDiv.appendChild(tagContainer);
 	}
 	if(isDebugModeOn()){
 		let debugtext=document.createElement('pre');
@@ -484,4 +497,67 @@ async function getData(url){
 		console.log('fetched all');
 	}
 	return eventArr;
+}
+
+function makeStringToColor(str,hueDiv,hueAdd,satDiv,satAdd,lumDiv,lumAdd,bInt=true){
+	
+	let stringNumber=stringToBigInt(str,bInt);
+
+	if(typeof BigInt==='function'&&bInt){
+		hueDiv=BigInt(hueDiv);
+		hueAdd=BigInt(hueAdd);
+		satDiv=BigInt(satDiv);
+		satAdd=BigInt(satAdd);
+		lumDiv=BigInt(lumDiv);
+		lumAdd=BigInt(lumAdd);
+	}
+
+	let colorObj= {
+		hue:(stringNumber%hueDiv)+hueAdd,
+		sat:(stringNumber%satDiv)+satAdd,
+		lum:(stringNumber%lumDiv)+lumAdd
+	}
+
+	console.log(colorObj);
+
+	return colorObj;
+}
+
+function stringToBigInt(str,bInt=true){
+	let numStr='';
+
+	for(let i=0;i<str.length;i++ ){
+		let valueofChar=str.codePointAt(i).toString(16).padStart(4,'0');
+		numStr=numStr+valueofChar;
+	}
+	
+	let stringIntVal;
+	if(typeof BigInt==='function'&&bInt){
+		
+		stringIntVal=BigInt('0x'+numStr);
+	}
+	else{
+		
+		stringIntVal=parseInt('0x'+numStr);
+	}
+
+	return stringIntVal;
+}
+
+function makeStringToColorBorder(str,bInt=true){
+
+	return makeStringToColor(str,359,0,83,17,59,30,bInt);
+
+}
+function makeStringToColorBackground(str,bInt=true){
+
+	let col= makeStringToColor(str,113,0,73,9,19,70,bInt);
+
+	if(typeof BigInt==='function'&&bInt){
+		col.hue=col.hue*BigInt(3);
+	}
+	else{
+		col.hue=col.hue*3;
+	}
+	return col;
 }
