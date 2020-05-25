@@ -1,7 +1,8 @@
 window.addEventListener('DOMContentLoaded',async ()=>{
-	
-	let data=await getSwingLeftEvents(mobilizeURL);
 	writeZipCodeFilterControls();
+	writeFilterByDateControls();
+	let data=await getSwingLeftEvents(mobilizeURL);
+	
 	addHcdpCalender(data);
 	writeFilterByTypeControls(data);
 	writeFilterByTagControls(data);
@@ -147,6 +148,41 @@ function writeFilterByVirtualStatusControls(swingtxleftEvents){
 
 }
 
+function writeFilterByDateControls(){
+	
+	let dateFilterContainer=document.getElementById('swingleftDateFilter');
+
+	dateFilterContainer.appendChild(document.createTextNode('Events from'));
+
+	
+
+	let startInput=document.createElement('input');
+	startInput.setAttribute('type','date');
+	startInput.setAttribute('id','startDateForFilter');
+	startInput.addEventListener('blur',whenFilterDateEnabledReAddCalanderWithFiltering);
+	dateFilterContainer.appendChild(startInput);
+
+	dateFilterContainer.appendChild(document.createTextNode(' to '));
+
+	let endInput=document.createElement('input');
+	endInput.setAttribute('type','date');
+	endInput.setAttribute('id','endDateForFilter');
+	endInput.addEventListener('blur',whenFilterDateEnabledReAddCalanderWithFiltering);
+	dateFilterContainer.appendChild(endInput);
+
+	let dateFilterButton=elementWithText('button','Filter by Date');
+	dateFilterButton.classList.add('dateFilterButton');
+	dateFilterButton.addEventListener('click',filterButtonClick);
+	dateFilterContainer.appendChild(dateFilterButton);
+
+}
+
+function whenFilterDateEnabledReAddCalanderWithFiltering(){
+	if(document.querySelectorAll('.dateFilterButton.eventFilterButtonSelected').length>0){
+		reAddCalanderWithFiltering();
+	}
+	
+}
 
 function writeFilterByTagControls(swingtxleftEvents){
 	let tagFilterContainer=document.getElementById('swingleftTagOptions');
@@ -215,12 +251,42 @@ async function reAddCalanderWithFiltering(){
 	}
 
 
+	if(document.querySelectorAll('.dateFilterButton.eventFilterButtonSelected').length>0){
+		console.log('date filtering');
+		let startDateArr=document.getElementById('startDateForFilter').value.split('-').map((el)=>{
+			return parseInt(el,10);
+		});
+		let endDateArr=document.getElementById('endDateForFilter').value.split('-').map((el)=>{
+			return parseInt(el,10);
+		});
+	
+		console.log({
+			s:startDateArr,
+			e:endDateArr
+		});
+
+		let startDate=new Date(startDateArr[0],startDateArr[1]-1,startDateArr[2]);
+
+		let endDate=new Date(endDateArr[0],endDateArr[1]-1,endDateArr[2]);
+
+		console.log({
+	
+			ss:startDate.toLocaleString(),
+			es:endDate.toLocaleString()
+		})
+
+		let startSec=Math.floor(startDate.getTime()/1000);
+
+		let endSec=Math.floor(endDate.getTime()/1000)+(24*60*60);
+
+		
+
+		queryURL=queryURL+'&timeslot_start=gte_'+startSec+'&timeslot_start=lte_'+endSec;
+	}
+
 
 
 	console.log(queryURL);
-
-
-	let additionalFilter
 
 	let data=await getSwingLeftEvents(queryURL);
 	
@@ -237,7 +303,6 @@ async function reAddCalanderWithFiltering(){
 		});
 	}
 	
-
 	addHcdpCalender(data);
 }
 
@@ -518,7 +583,7 @@ function makeStringToColor(str,hueDiv,hueAdd,satDiv,satAdd,lumDiv,lumAdd,bInt=tr
 		lum:(stringNumber%lumDiv)+lumAdd
 	}
 
-	console.log(colorObj);
+	//console.log(colorObj);
 
 	return colorObj;
 }
