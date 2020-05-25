@@ -1,3 +1,7 @@
+//note requires commonmark
+// see https://github.com/commonmark/commonmark.js
+
+
 window.addEventListener('DOMContentLoaded',async ()=>{
 	writeZipCodeFilterControls();
 	writeFilterByDateControls();
@@ -360,13 +364,7 @@ function eventTimeSlotHTML(eventTimeSlot){
 	// 	eventDiv.appendChild(eventFieldHTML('Summary',event.summary));
 	// }
 
-	
-
-	
-
 	eventDiv.appendChild(eventFieldHTML('Type',humanizeEventType(event.event_type)));
-	
-	
 
 	let dateFormater=new Intl.DateTimeFormat(undefined,{
 		weekday:'long',
@@ -389,7 +387,7 @@ function eventTimeSlotHTML(eventTimeSlot){
 
 	if(event.location!==null){
 		
-			eventDiv.appendChild(eventFieldHTML('Location',event.location.venue));
+		eventDiv.appendChild(eventFieldHTML('Location',event.location.venue));
 		if(event.address_visibility==='PUBLIC'){
 			let googlemapurl='https://www.google.com/maps/dir/?api=1';
 			let address=event.location.address_lines.join(' ')+' '+event.location.locality+', '+event.location.region+' '+event.location.postal_code
@@ -406,21 +404,32 @@ function eventTimeSlotHTML(eventTimeSlot){
 		eventDiv.appendChild(elementWithText('div',event.location.locality+', '+event.location.region+' '+event.location.postal_code));
 	}
 
-	let descriptionPreviewLength=200;
+	let descriptionPreviewLength=4;
+	let descriptionLines=event.description.split('\n');
 
-	let descriptionField=elementWithText('div',event.description.substring(0,descriptionPreviewLength));
-	eventDiv.appendChild(descriptionField);
-	if(event.description.length>descriptionPreviewLength){
+	let descriptionField=document.createElement('div');
+	
+	// let commonmark = await import('https://raw.githubusercontent.com/commonmark/commonmark.js/master/dist/commonmark.js');
+	let markdownReader=new commonmark.Parser();
+	let markdownWriter=new commonmark.HtmlRenderer({safe:true});
+
+	if(descriptionLines.length>descriptionPreviewLength){
 		let showMoreClicker=elementWithText('a',' ...Click to Show More');
-		
+		descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(descriptionLines.slice(0,descriptionPreviewLength).join('\n')));
 		showMoreClicker.addEventListener('click',(ev)=>{
-			descriptionField.innerText=event.description;
+			descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(event.description));
 			ev.currentTarget.remove();
 		});
 
 
 		descriptionField.appendChild(showMoreClicker);
 	}
+	else{
+		descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(event.description));
+	}
+	eventDiv.appendChild(descriptionField);
+
+
 	// let eventLink=document.createElement('a');
 
 	// eventLink.setAttribute('href',event.browser_url);
