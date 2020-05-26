@@ -1,5 +1,4 @@
-//note requires commonmark
-// see https://github.com/commonmark/commonmark.js
+//note requires https://github.com/markdown-it/markdown-it in order to run
 
 
 window.addEventListener('DOMContentLoaded',async ()=>{
@@ -410,15 +409,16 @@ function eventTimeSlotHTML(eventTimeSlot){
 
 	let descriptionField=document.createElement('div');
 	
-	// let commonmark = await import('https://raw.githubusercontent.com/commonmark/commonmark.js/master/dist/commonmark.js');
-	let markdownReader=new commonmark.Parser();
-	let markdownWriter=new commonmark.HtmlRenderer({safe:true});
+
+	let markdownIt=window.markdownit({
+		linkify:true
+	});
 
 	if(descriptionLines.length>descriptionPreviewLength){
 		let showMoreClicker=elementWithText('a',' ...Click to Show More');
-		descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(descriptionLines.slice(0,descriptionPreviewLength).join('\n\n')));
+		descriptionField.innerHTML=markdownIt.render(descriptionLines.slice(0,descriptionPreviewLength).join('\n\n'));
 		showMoreClicker.addEventListener('click',(ev)=>{
-			descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(event.description));
+			descriptionField.innerHTML=markdownIt.render(event.description);
 			ev.currentTarget.remove();
 		});
 
@@ -426,7 +426,7 @@ function eventTimeSlotHTML(eventTimeSlot){
 		descriptionField.appendChild(showMoreClicker);
 	}
 	else{
-		descriptionField.innerHTML=markdownWriter.render(markdownReader.parse(event.description));
+		descriptionField.innerHTML=markdownIt.render(event.description);
 	}
 	eventDiv.appendChild(descriptionField);
 
