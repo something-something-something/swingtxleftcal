@@ -450,18 +450,8 @@ function eventTimeSlotHTML(eventTimeSlot){
 		tagContainer.classList.add('containerOfEventTags')
 		for (let t of event.tags){
 
-			let tagEl=document.createElement('div');
-			tagEl.classList.add('eventTag');
-			let theColor=makeStringToColorBorder(t.name);
-	
-			tagEl.style.borderColor='hsl('+theColor.hue+','+theColor.sat+'%,'+theColor.lum+'%)';
-		
-			let theColorB=makeStringToColorBackground(t.name);
-			tagEl.style.backgroundColor='hsl('+theColorB.hue+','+theColorB.sat+'%,'+theColorB.lum+'%)';
-
-			tagEl.textContent=t.name;
-
-			tagContainer.appendChild(tagEl)
+			
+			tagContainer.appendChild(makeTagHTML(t));
 		}
 		eventDiv.appendChild(tagContainer);
 	}
@@ -473,6 +463,25 @@ function eventTimeSlotHTML(eventTimeSlot){
 
 	return eventDiv;
 }
+
+
+function makeTagHTML(t){
+	let tagEl=document.createElement('div');
+	tagEl.classList.add('eventTag');
+	let theColor=makeStringToColorBorder(t.name);
+
+	tagEl.style.borderColor='hsl('+theColor.hue+','+theColor.sat+'%,'+theColor.lum+'%)';
+
+	let theColorB=makeStringToColorBackground(t.name);
+	tagEl.style.backgroundColor='hsl('+theColorB.hue+','+theColorB.sat+'%,'+theColorB.lum+'%)';
+
+	tagEl.textContent=t.name;
+
+
+	return tagEl
+
+}
+
 
 function overlaySignUp(ev){
 	let signUpContainer=document.createElement('div');
@@ -621,18 +630,22 @@ function stringToBigInt(str,bInt=true){
 
 function makeStringToColorBorder(str,bInt=true){
 
-	return makeStringToColor(str,359,0,83,17,59,30,bInt);
+	return makeStringToColor(str,359,0,83,17,59,20,bInt);
 
 }
 function makeStringToColorBackground(str,bInt=true){
 
-	let col= makeStringToColor(str,113,0,73,9,19,70,bInt);
-
-	if(typeof BigInt==='function'&&bInt){
-		col.hue=col.hue*BigInt(3);
-	}
-	else{
-		col.hue=col.hue*3;
-	}
-	return col;
+	let col= makeStringToColor(str,3,1,23,0,17,63,bInt);
+	let col2= makeStringToColor(str.split('').reverse().join('113'),181,300,73,0,19,0,bInt);
+	// if(typeof BigInt==='function'&&bInt){
+	// 	col.hue=col.hue*BigInt(3);
+	// }
+	// else{
+	// 	col.hue=col.hue*3;
+	// }
+	return {
+		hue:col.hue*col2.hue,
+		sat:col.sat+col2.sat,
+		lum:col.lum+col2.lum,
+	};
 }
