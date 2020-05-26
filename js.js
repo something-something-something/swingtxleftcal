@@ -636,7 +636,7 @@ function makeStringToColorBorder(str,bInt=true){
 function makeStringToColorBackground(str,bInt=true){
 
 	let col= makeStringToColor(str,3,1,23,0,17,63,bInt);
-	let col2= makeStringToColor(str.split('').reverse().join('113'),181,300,73,0,19,0,bInt);
+	let col2= makeStringToColor(str.split('').reverse().join(''),181,300,73,0,19,0,bInt);
 	// if(typeof BigInt==='function'&&bInt){
 	// 	col.hue=col.hue*BigInt(3);
 	// }
