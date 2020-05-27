@@ -98,7 +98,7 @@ function writeZipCodeFilterControls(){
 
 	zipFilterContainer.appendChild(document.createTextNode('miles'));
 
-	let zipFilterButton=elementWithText('button','Filter by location (This will exclude Virtual Events From Results)');
+	let zipFilterButton=elementWithText('button','Filter by location');
 	zipFilterButton.classList.add('locationFilterButton');
 	zipFilterButton.addEventListener('click',filterButtonClick);
 	zipFilterContainer.appendChild(zipFilterButton);
@@ -523,6 +523,8 @@ function makeTagHTML(t){
 	let theColorB=makeStringToColorBackground(t.name);
 	tagEl.style.backgroundColor='hsl('+theColorB.hue+','+theColorB.sat+'%,'+theColorB.lum+'%)';
 
+	let theColorC=makeStringToColorBottomBorder(t.name);
+	tagEl.style.borderBottomColor='hsl('+theColorC.hue+','+theColorC.sat+'%,'+theColorC.lum+'%)';
 	tagEl.textContent=t.name;
 
 
@@ -681,10 +683,17 @@ function makeStringToColorBorder(str,bInt=true){
 	return makeStringToColor(str,359,0,83,17,59,20,bInt);
 
 }
+
+function makeStringToColorBottomBorder(str,bInt=true){
+
+	return makeStringToColor(str.split('').reverse().join(''),7829,100,17,83,20,40,bInt);
+
+}
+
 function makeStringToColorBackground(str,bInt=true){
 
-	let col= makeStringToColor(str,3,0,23,0,17,63,bInt);
-	let col2= makeStringToColor(str.split('').reverse().join(''),113,300,73,0,19,0,bInt);
+	let col= makeStringToColor(str,3,0,23,4,19,70,bInt);
+	let col2= makeStringToColor(str.split('').reverse().join(''),113,300,73,0,1,0,bInt);
 	let hue;
 	if(typeof BigInt==='function'&&bInt){
 		hue=col2.hue+(col.hue*BigInt(120));
@@ -695,6 +704,6 @@ function makeStringToColorBackground(str,bInt=true){
 	return {
 		hue:hue,
 		sat:col.sat+col2.sat,
-		lum:col.lum+col2.lum,
+		lum:col.lum,
 	};
 }
