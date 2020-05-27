@@ -1,9 +1,11 @@
+'use strict';
 //note requires https://github.com/markdown-it/markdown-it in order to run
 
 
 window.addEventListener('DOMContentLoaded',async ()=>{
 	writeZipCodeFilterControls();
 	writeFilterByDateControls();
+	writeFilterResetControls();
 	let data=await getSwingLeftEvents(mobilizeURL);
 	
 	addHcdpCalender(data);
@@ -36,7 +38,7 @@ function fetchAllEventsModeOn(){
 async function getSwingLeftEvents(queryURL){
 	let theData=await getData(queryURL);
 	console.log(theData);
-	swingtxleftEvents=theData.filter(filterOnlySwingTXLeft);
+	let swingtxleftEvents=theData.filter(filterOnlySwingTXLeft);
 	return swingtxleftEvents;
 }
 
@@ -84,6 +86,7 @@ function writeZipCodeFilterControls(){
 	let zipInput=document.createElement('input');
 	zipInput.setAttribute('id','zipCodeForFilter');
 	zipInput.setAttribute('type','text');
+	zipInput.setAttribute('pattern','\\d{5}');
 	zipInput.addEventListener('blur',whenFilterLocationEnabledReAddCalanderWithFiltering);
 	zipFilterContainer.appendChild(zipInput);
 
@@ -92,7 +95,7 @@ function writeZipCodeFilterControls(){
 
 	let distianceInput=document.createElement('input');
 	distianceInput.setAttribute('id','distanceForFilter');
-	distianceInput.setAttribute('type','text');
+	distianceInput.setAttribute('type','number');
 	distianceInput.addEventListener('blur',whenFilterLocationEnabledReAddCalanderWithFiltering);
 	zipFilterContainer.appendChild(distianceInput);
 
@@ -131,6 +134,7 @@ function writeFilterByTypeControls(swingtxleftEvents){
 
 	}
 }
+
 function writeFilterByVirtualStatusControls(swingtxleftEvents){
 	let virtualStatusFilterContainer=document.getElementById('swingleftVirtualStatusOptions');
 	virtualStatusFilterContainer.innerHTML=''
@@ -161,6 +165,8 @@ function writeFilterByDateControls(){
 
 	let startInput=document.createElement('input');
 	startInput.setAttribute('type','date');
+	startInput.setAttribute('placeholder','yyyy-mm-dd');
+	startInput.setAttribute('pattern','\\d\\d\\d\\d-\\d\\d-\\d\\d');
 	startInput.setAttribute('id','startDateForFilter');
 	startInput.addEventListener('blur',whenFilterDateEnabledReAddCalanderWithFiltering);
 	dateFilterContainer.appendChild(startInput);
@@ -169,6 +175,8 @@ function writeFilterByDateControls(){
 
 	let endInput=document.createElement('input');
 	endInput.setAttribute('type','date');
+	endInput.setAttribute('placeholder','yyyy-mm-dd');
+	endInput.setAttribute('pattern','\\d\\d\\d\\d-\\d\\d-\\d\\d');
 	endInput.setAttribute('id','endDateForFilter');
 	endInput.addEventListener('blur',whenFilterDateEnabledReAddCalanderWithFiltering);
 	dateFilterContainer.appendChild(endInput);
@@ -185,6 +193,25 @@ function whenFilterDateEnabledReAddCalanderWithFiltering(){
 		reAddCalanderWithFiltering();
 	}
 	
+}
+
+function writeFilterResetControls(){
+	
+	let resetFilterContainer=document.getElementById('swingleftResetFilters');
+
+	resetFilterContainer.appendChild(document.createTextNode('Reset Filters: '));
+
+	let resetFilterButton=elementWithText('button','Show All');
+	resetFilterButton.addEventListener('click',resetFilters);
+	resetFilterContainer.appendChild(resetFilterButton);
+
+}
+function resetFilters(){
+	let selectedFiltersButtons=document.querySelectorAll('.eventFilterButtonSelected');
+	for(let b of selectedFiltersButtons){
+		b.classList.remove('eventFilterButtonSelected');
+	}
+	reAddCalanderWithFiltering();
 }
 
 function writeFilterByTagControls(swingtxleftEvents){
@@ -358,7 +385,7 @@ function writeEvents(events,elementContainer){
 
 function eventTimeSlotHTML(eventTimeSlot){
 	let event=eventTimeSlot.event;
-	eventDiv=document.createElement('div');
+	let eventDiv=document.createElement('div');
 	eventDiv.setAttribute('id','eventid-'+event.id+'-'+eventTimeSlot.timeslot.start_date+'-'+eventTimeSlot.timeslot.end_date);
 
 	eventDiv.appendChild(elementWithText('h2',event.title));
@@ -441,7 +468,7 @@ function eventTimeSlotHTML(eventTimeSlot){
 			let address=event.location.address_lines.join(' ')+' '+event.location.locality+', '+event.location.region+' '+event.location.postal_code
 			googlemapurl=googlemapurl+'&destination='+encodeURIComponent(address);
 
-			mapLink=document.createElement('a');
+			let mapLink=document.createElement('a');
 			mapLink.setAttribute('href',googlemapurl);
 			mapLink.setAttribute('target','_blank');
 			mapLink.appendChild(document.createTextNode('Directions'));
@@ -618,7 +645,9 @@ function humanizeEventType(eventType){
 }
 
 async function getData(url){
-	let res=await fetch(url);
+	let res=await fetch(url,{
+		referrerPolicy:'no-referrer'
+	});
 	let eventArr=[];
 	let theJson=await res.json();
 	console.log(theJson);

@@ -37,32 +37,37 @@
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
-			let sampTagButton = document.getElementById('makeSampleTagsButton');
-			sampTagButton.addEventListener('click', () => {
-				document.getElementById('randTags').innerText = '';
-				let tagNames = [
-					'Some Test Names',
-					'Democrats',
-					'Get out the Vote',
-					'Healthcare',
-					'Voter registration',
-					'Rsvp',
-					'Zoom',
-					'Vote By Mail',
-					'Meeting',
-					'Meet up',
-					'End Test Tags',
-					'Starting Random Tags:'
-				].concat(randomWordArray(500));
+				let sampTagButton = document.getElementById('makeSampleTagsButton');
+				sampTagButton.addEventListener('click', () => {
+					if (document.getElementById('randTags').innerText === '') {
+						
+						let tagNames = [
+							'Some Test Names',
+							'Democrats',
+							'Get out the Vote',
+							'Healthcare',
+							'Voter registration',
+							'Rsvp',
+							'Zoom',
+							'Vote By Mail',
+							'Meeting',
+							'Meet up',
+							'End Test Tags',
+							'Starting Random Tags:'
+						].concat(randomWordArray(500));
 
-				for (let tname of tagNames) {
-					document.getElementById('randTags').appendChild(makeTagHTML({ name: tname }));
-				}
+						for (let tname of tagNames) {
+							document.getElementById('randTags').appendChild(makeTagHTML({ name: tname }));
+						}
 
+					}
+					else{
+						document.getElementById('randTags').innerText = '';
+					}
+
+				});
 
 			});
-
-		});
 	</script>
 
 	<style>
@@ -110,6 +115,13 @@
 
 
 		}
+		.controls>div{
+			margin:0.5em 0 0.5em 0;
+		}
+
+		input:invalid{
+			background-color: rgb(255,200,200);
+		}
 	</style>
 </head>
 
@@ -118,12 +130,14 @@
 
 	<button id="makeSampleTagsButton">Show Sample Tags for color Range Testing</button>
 	<div id="randTags" class="containerOfEventTags"></div>
-
+<div class="controls">
 	<div id="swingleftTypeOptions"> </div>
 	<div id="swingleftTagOptions"> </div>
 	<div id="swingleftZipCodeFilter"></div>
 	<div id="swingleftDateFilter"></div>
 	<div id="swingleftVirtualStatusOptions"></div>
+	<div id="swingleftResetFilters"></div>
+</div>
 	<div id="swingleftevents">Loading</div>
 
 
