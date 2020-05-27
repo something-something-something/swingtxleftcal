@@ -359,12 +359,19 @@ function writeEvents(events,elementContainer){
 function eventTimeSlotHTML(eventTimeSlot){
 	let event=eventTimeSlot.event;
 	eventDiv=document.createElement('div');
+	eventDiv.setAttribute('id','eventid-'+event.id+'-'+eventTimeSlot.timeslot.start_date+'-'+eventTimeSlot.timeslot.end_date);
+
 	eventDiv.appendChild(elementWithText('h2',event.title));
 	// if(event.summary!==''){
 	// 	eventDiv.appendChild(eventFieldHTML('Summary',event.summary));
 	// }
 
+	if(event.is_virtual){
+		eventDiv.appendChild(elementWithText('div','Virtual Event'));
+	}
+
 	eventDiv.appendChild(eventFieldHTML('Type',humanizeEventType(event.event_type)));
+
 
 	let dateFormater=new Intl.DateTimeFormat(undefined,{
 		weekday:'long',
@@ -380,10 +387,51 @@ function eventTimeSlotHTML(eventTimeSlot){
 	let startDate=new Date(eventTimeSlot.timeslot.start_date*1000);
 	let endDate=new Date(eventTimeSlot.timeslot.end_date*1000)
 	
+	
+
+
 	eventDiv.appendChild(eventFieldHTML('Starts',dateFormater.format(startDate)));
 	
 	eventDiv.appendChild(eventFieldHTML('Ends',dateFormater.format(endDate)));
 	//eventDiv.appendChild(eventTimeSlotsHTML(event.timeslots));
+
+	if(event.timeslots.length>1){
+		let showMoreTimesText='Show More Times';
+		let hideMoreTimesText='Hide More Times';
+		let showMoreTimesButton=elementWithText('button',showMoreTimesText);
+		let showMoreTimesContainer=document.createElement('ul');
+
+		showMoreTimesButton.addEventListener('click',()=>{
+			if (showMoreTimesButton.innerText === showMoreTimesText) {
+				for (let t of event.timeslots) {
+					if (t.start_date !== eventTimeSlot.timeslot.start_date && t.end_date !== eventTimeSlot.timeslot.end_date) {
+
+						let sdate = new Date(t.start_date * 1000);
+						let edate = new Date(t.end_date * 1000);
+						let timeText = dateFormater.format(sdate) + ' to ' + dateFormater.format(edate);
+						let li=document.createElement('li');
+						let link=elementWithText('a', timeText);
+						link.setAttribute('href','#eventid-'+event.id+'-'+t.start_date+'-'+t.end_date);
+
+						li.appendChild(link);
+						showMoreTimesContainer.appendChild(li);
+					}
+				}
+				showMoreTimesButton.innerText=hideMoreTimesText;
+			}
+			else{
+				showMoreTimesContainer.innerText='';
+				showMoreTimesButton.innerText=showMoreTimesText;
+			}
+		
+
+		});
+
+
+		eventDiv.appendChild(showMoreTimesButton);
+		eventDiv.appendChild(showMoreTimesContainer);
+
+	}
 
 	if(event.location!==null){
 		
@@ -635,16 +683,17 @@ function makeStringToColorBorder(str,bInt=true){
 }
 function makeStringToColorBackground(str,bInt=true){
 
-	let col= makeStringToColor(str,3,1,23,0,17,63,bInt);
-	let col2= makeStringToColor(str.split('').reverse().join(''),181,300,73,0,19,0,bInt);
-	// if(typeof BigInt==='function'&&bInt){
-	// 	col.hue=col.hue*BigInt(3);
-	// }
-	// else{
-	// 	col.hue=col.hue*3;
-	// }
+	let col= makeStringToColor(str,3,0,23,0,17,63,bInt);
+	let col2= makeStringToColor(str.split('').reverse().join(''),113,300,73,0,19,0,bInt);
+	let hue;
+	if(typeof BigInt==='function'&&bInt){
+		hue=col2.hue+(col.hue*BigInt(120));
+	}
+	else{
+		hue=col2.hue+(col.hue*120);
+	}
 	return {
-		hue:col.hue*col2.hue,
+		hue:hue,
 		sat:col.sat+col2.sat,
 		lum:col.lum+col2.lum,
 	};

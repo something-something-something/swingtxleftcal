@@ -1,42 +1,46 @@
 <!DOCTYPE html>
-<html  lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.0/markdown-it.min.js" integrity="sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=" crossorigin="anonymous"></script>
-		<script src="js.js"></script>
+<html lang="en">
 
-		<script>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.0/markdown-it.min.js"
+		integrity="sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=" crossorigin="anonymous"></script>
+	<script src="js.js"></script>
 
-			function randomWordArray(num){
-				let words=[]
+	<script>
 
-				for(let i=0;i<num;i++){
-					if(Math.random()>0.5){
-						words.push(makeRandomWord()+' '+makeRandomWord());
-					}
-					else{
-						words.push(makeRandomWord());
-					}
-					
+		function randomWordArray(num) {
+			let words = []
+
+			for (let i = 0; i < num; i++) {
+				if (Math.random() > 0.5) {
+					words.push(makeRandomWord() + ' ' + makeRandomWord());
 				}
-				return words;
-			}
-
-			function makeRandomWord(){
-				
-				let letterNum=Math.floor(Math.random()*10)+1+5;
-				let word='';
-				for(let i=0; i< letterNum;i++){
-					let l=Math.floor(Math.random()*24)+97;
-					word=word+String.fromCharCode(l);
+				else {
+					words.push(makeRandomWord());
 				}
-				return word;
+
 			}
+			return words;
+		}
 
-			document.addEventListener('DOMContentLoaded',()=>{
+		function makeRandomWord() {
 
-				let tagNames=[
+			let letterNum = Math.floor(Math.random() * 10) + 1 + 5;
+			let word = '';
+			for (let i = 0; i < letterNum; i++) {
+				let l = Math.floor(Math.random() * 24) + 97;
+				word = word + String.fromCharCode(l);
+			}
+			return word;
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+			let sampTagButton = document.getElementById('makeSampleTagsButton');
+			sampTagButton.addEventListener('click', () => {
+				document.getElementById('randTags').innerText = '';
+				let tagNames = [
 					'Some Test Names',
 					'Democrats',
 					'Get out the Vote',
@@ -50,66 +54,78 @@
 					'End Test Tags',
 					'Starting Random Tags:'
 				].concat(randomWordArray(500));
-				for(let tname of tagNames){
-					document.getElementById('randTags').appendChild(makeTagHTML({name:tname}));
+
+				for (let tname of tagNames) {
+					document.getElementById('randTags').appendChild(makeTagHTML({ name: tname }));
 				}
-				
+
+
 			});
-		</script>
 
-		<style>
-			body{
-				margin:3em;
-				font-family: sans-serif;
-			}
+		});
+	</script>
 
-			#swingleftevents>div {
-				padding: 1em;
-				border-width: 2px;
-				border-style: solid;
-				border-color: rgb(8, 74, 218);
-				margin: 1em;
-				border-radius: 1em;
-			}
-			a{
-				color:rgb(0,0,255);
-			}
-			.eventFilterButtonSelected{
-				background-color: rgb(6, 240, 45);
-			}
+	<style>
+		body {
+			margin: 3em;
+			font-family: sans-serif;
+		}
 
-			.containerOfEventTags .eventTag{
+		#swingleftevents>div {
+			padding: 1em;
+			border-width: 2px;
+			border-style: solid;
+			border-color: rgb(8, 74, 218);
+			margin: 1em;
+			border-radius: 1em;
+		}
 
-				display: inline-block;
-				border-width:0 0.5em 0em 0.5em;
-				border-style: solid;
-				border-radius: 0.5em; 
-				padding: 0.5em;
-				margin:0.5em;
+		a {
+			color: rgb(0, 0, 255);
+		}
 
-				border-width:0 0 0.5em 0;
-				border-radius: 0 0.5em; 
+		.eventFilterButtonSelected {
+			background-color: rgb(6, 240, 45);
+		}
 
-				border-width:0 0 0 0.5em;
-				
-				border-radius: 0;
-				/* padding-right: 1em; */
-				/* border-radius: 0 0.75em 0.75em 0;  */
+		.containerOfEventTags .eventTag {
 
+			display: inline-block;
+			border-width: 0 0.5em 0em 0.5em;
+			border-style: solid;
+			border-radius: 0.5em;
+			padding: 0.5em;
+			margin: 0.5em;
 
-			}
-		</style>
-	</head>
-	<body>
-		<h1>Events</h1>
-		<div id="swingleftTypeOptions"> </div>
-		<div id="swingleftTagOptions"> </div>
-		<div id="swingleftZipCodeFilter"></div>
-		<div id="swingleftDateFilter"></div>
-		<div id="swingleftVirtualStatusOptions"></div>
-		<div id="swingleftevents">Loading</div>
+			border-width: 0 0 0.5em 0;
+			border-radius: 0 0.5em;
+
+			border-width: 0 0 0 0.5em;
+
+			border-radius: 0;
+			/* padding-right: 1em; */
+			/* border-radius: 0 0.75em 0.75em 0;  */
 
 
-		<div id="randTags" class="containerOfEventTags"></div>
-	</body>
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Events</h1>
+
+	<button id="makeSampleTagsButton">Show Sample Tags for color Range Testing</button>
+	<div id="randTags" class="containerOfEventTags"></div>
+
+	<div id="swingleftTypeOptions"> </div>
+	<div id="swingleftTagOptions"> </div>
+	<div id="swingleftZipCodeFilter"></div>
+	<div id="swingleftDateFilter"></div>
+	<div id="swingleftVirtualStatusOptions"></div>
+	<div id="swingleftevents">Loading</div>
+
+
+
+</body>
+
 </html>
