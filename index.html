@@ -122,6 +122,39 @@
 		input:invalid{
 			background-color: rgb(255,200,200);
 		}
+
+		details>summary{
+			list-style:none;
+		}
+		details>summary::-webkit-details-marker{
+			display:none;
+		}
+		details>summary:focus{
+			outline-width:0;
+			
+		}
+
+
+		#swingleftevents details>summary{
+			display:inline-block;
+			border-radius:0.5em;
+			background-color: rgba(220, 236, 247, 0.973);
+			transition:background-color 0.5s;
+			padding:0.5em
+		}
+
+		
+
+		#swingleftevents details[open]>summary{
+			
+			background-color: rgb(166, 187, 211);
+
+		}
+		#swingleftevents details>summary:hover{
+			background-color: rgba(178, 236, 181, 0.973);
+		}
+
+
 	</style>
 </head>
 

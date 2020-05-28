@@ -423,39 +423,27 @@ function eventTimeSlotHTML(eventTimeSlot){
 	//eventDiv.appendChild(eventTimeSlotsHTML(event.timeslots));
 
 	if(event.timeslots.length>1){
-		let showMoreTimesText='Show More Times';
-		let hideMoreTimesText='Hide More Times';
-		let showMoreTimesButton=elementWithText('button',showMoreTimesText);
-		let showMoreTimesContainer=document.createElement('ul');
+		let showMoreTimesContainer=document.createElement('details');
 
-		showMoreTimesButton.addEventListener('click',()=>{
-			if (showMoreTimesButton.innerText === showMoreTimesText) {
-				for (let t of event.timeslots) {
-					if (t.start_date !== eventTimeSlot.timeslot.start_date && t.end_date !== eventTimeSlot.timeslot.end_date) {
-
-						let sdate = new Date(t.start_date * 1000);
-						let edate = new Date(t.end_date * 1000);
-						let timeText = dateFormater.format(sdate) + ' to ' + dateFormater.format(edate);
-						let li=document.createElement('li');
-						let link=elementWithText('a', timeText);
-						link.setAttribute('href','#eventid-'+event.id+'-'+t.start_date+'-'+t.end_date);
-
-						li.appendChild(link);
-						showMoreTimesContainer.appendChild(li);
-					}
-				}
-				showMoreTimesButton.innerText=hideMoreTimesText;
-			}
-			else{
-				showMoreTimesContainer.innerText='';
-				showMoreTimesButton.innerText=showMoreTimesText;
-			}
+		let showMoreTimesButton=elementWithText('summary','Show More Times');
+		showMoreTimesContainer.appendChild(showMoreTimesButton);
 		
+		let showMoreTimesList=document.createElement('ul');
+		for (let t of event.timeslots) {
+			if (t.start_date !== eventTimeSlot.timeslot.start_date && t.end_date !== eventTimeSlot.timeslot.end_date) {
 
-		});
+				let sdate = new Date(t.start_date * 1000);
+				let edate = new Date(t.end_date * 1000);
+				let timeText = dateFormater.format(sdate) + ' to ' + dateFormater.format(edate);
+				let li=document.createElement('li');
+				let link=elementWithText('a', timeText);
+				link.setAttribute('href','#eventid-'+event.id+'-'+t.start_date+'-'+t.end_date);
 
-
-		eventDiv.appendChild(showMoreTimesButton);
+				li.appendChild(link);
+				showMoreTimesList.appendChild(li);
+			}
+		}	
+		showMoreTimesContainer.appendChild(showMoreTimesList);
 		eventDiv.appendChild(showMoreTimesContainer);
 
 	}
